@@ -57,7 +57,7 @@ PLATFORMS
 
 DEPENDENCIES
   haml_to_erb!
-  herb
+  herb (>= 0.1, >= 0)
   rspec (~> 3.0)
 
 BUNDLED WITH
