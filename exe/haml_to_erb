@@ -1,0 +1,106 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "haml_to_erb"
+
+def print_usage
+  puts "Usage: haml_to_erb <path> [options]"
+  puts
+  puts "Options:"
+  puts "  --delete    Delete original .haml files after conversion"
+  puts "  --check     Validate ERB output with Herb parser"
+  puts "  --help      Show this help message"
+  puts
+  puts "Examples:"
+  puts "  haml_to_erb app/views              # Convert all HAML files in directory"
+  puts "  haml_to_erb app/views --check      # Convert and validate with Herb"
+  puts "  haml_to_erb file.html.haml         # Convert a single file"
+end
+
+if ARGV.empty? || ARGV.include?("--help")
+  print_usage
+  exit ARGV.include?("--help") ? 0 : 1
+end
+
+path = ARGV.find { |arg| !arg.start_with?("--") }
+delete_original = ARGV.include?("--delete")
+validate = ARGV.include?("--check")
+
+if validate && !HamlToErb.herb_available?
+  puts "Error: --check requires the herb gem. Install with: gem install herb"
+  exit 1
+end
+
+if File.directory?(path)
+  files = Dir.glob(File.join(path, "**/*.haml"))
+  puts "Converting #{files.count} HAML files in #{path}..."
+  puts "Validation: #{validate ? 'enabled (Herb)' : 'disabled'}"
+
+  success = 0
+  conversion_errors = []
+  validation_issues = []
+
+  files.each do |f|
+    begin
+      result = HamlToErb.convert_file(f, delete_original: delete_original, validate: validate)
+      success += 1
+      print "." if success % 50 == 0
+
+      if result[:errors].any?
+        validation_issues << { file: result[:path], errors: result[:errors] }
+      end
+    rescue StandardError => e
+      conversion_errors << { file: f, error: e.message }
+    end
+  end
+
+  puts
+  puts "Successfully converted: #{success}/#{files.count}"
+
+  if conversion_errors.any?
+    puts
+    puts "Conversion errors: #{conversion_errors.count}"
+    conversion_errors.each do |err|
+      puts "  #{err[:file]}: #{err[:error]}"
+    end
+  end
+
+  if validation_issues.any?
+    puts
+    puts "Validation issues (Herb): #{validation_issues.count} files"
+    validation_issues.each do |issue|
+      puts "  #{issue[:file]}:"
+      issue[:errors].each do |err|
+        location = [ err[:line], err[:column] ].compact.join(":")
+        location = " (#{location})" unless location.empty?
+        puts "    - #{err[:message]}#{location}"
+      end
+    end
+  elsif validate
+    puts "Validation: All files passed Herb parsing"
+  end
+
+  if delete_original && conversion_errors.empty?
+    puts "Original .haml files deleted."
+  end
+elsif File.file?(path)
+  result = HamlToErb.convert_file(path, delete_original: delete_original, validate: validate)
+
+  puts "Converted: #{path} -> #{result[:path]}"
+
+  if result[:errors].any?
+    puts "Validation issues:"
+    result[:errors].each do |err|
+      location = [ err[:line], err[:column] ].compact.join(":")
+      location = " (#{location})" unless location.empty?
+      puts "  - #{err[:message]}#{location}"
+    end
+  elsif validate
+    puts "Validation: Passed"
+  end
+
+  puts "Original deleted." if delete_original
+else
+  puts "Error: #{path} is not a file or directory"
+  exit 1
+end
