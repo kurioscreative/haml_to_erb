@@ -115,6 +115,11 @@ RSpec.describe HamlToErb::Interpolation do
         result = described_class.convert("\#{user['name']}")
         expect(result).to eq("<%= user['name'] %>")
       end
+
+      it "handles escaped backslash before closing quote" do
+        result = described_class.convert('Path: #{"C:\\\\"}')
+        expect(result).to eq('Path: <%= "C:\\\\" %>')
+      end
     end
   end
 end

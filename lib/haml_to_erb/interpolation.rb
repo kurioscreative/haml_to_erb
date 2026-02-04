@@ -35,7 +35,15 @@ module HamlToErb
             while j < text.length && depth > 0
               char = text[j]
               if in_string
-                in_string = nil if char == in_string && text[j - 1] != "\\"
+                if char == in_string
+                  num_backslashes = 0
+                  k = j - 1
+                  while k >= 0 && text[k] == "\\"
+                    num_backslashes += 1
+                    k -= 1
+                  end
+                  in_string = nil unless num_backslashes.odd?
+                end
               elsif char == '"' || char == "'"
                 in_string = char
               elsif char == "{"
