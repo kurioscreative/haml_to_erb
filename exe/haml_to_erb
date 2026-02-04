@@ -11,6 +11,7 @@ def print_usage
   puts "  --delete    Delete original .haml files after conversion"
   puts "  --check     Validate ERB output with Herb parser"
   puts "  --help      Show this help message"
+  puts "  --version   Show version number"
   puts
   puts "Examples:"
   puts "  haml_to_erb app/views              # Convert all HAML files in directory"
@@ -22,6 +23,11 @@ end
 if ARGV.empty? || ARGV.include?("--help")
   print_usage
   exit ARGV.include?("--help") ? 0 : 1
+end
+
+if ARGV.include?("--version") || ARGV.include?("-v")
+  puts "haml_to_erb #{HamlToErb::VERSION}"
+  exit 0
 end
 
 path = ARGV.find { |arg| !arg.start_with?("--") }
