@@ -75,7 +75,8 @@ module HamlToErb
     rescue Errno::EACCES
       return { path: erb_path, errors: [ { message: "Permission denied: #{haml_path}" } ], skipped: true }
     rescue Haml::SyntaxError => e
-      return { path: erb_path, errors: [ { message: "HAML syntax error: #{e.message}", line: e.line } ], skipped: true }
+      line = e.respond_to?(:line) ? e.line : nil
+      return { path: erb_path, errors: [ { message: "HAML syntax error: #{e.message}", line: line } ], skipped: true }
     end
 
     unless dry_run
