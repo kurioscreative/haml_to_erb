@@ -7,12 +7,14 @@ def print_usage
   puts "Usage: haml_to_erb <path> [options]"
   puts
   puts "Options:"
+  puts "  --dry-run   Preview conversion without writing files"
   puts "  --delete    Delete original .haml files after conversion"
   puts "  --check     Validate ERB output with Herb parser"
   puts "  --help      Show this help message"
   puts
   puts "Examples:"
   puts "  haml_to_erb app/views              # Convert all HAML files in directory"
+  puts "  haml_to_erb app/views --dry-run    # Preview without writing"
   puts "  haml_to_erb app/views --check      # Convert and validate with Herb"
   puts "  haml_to_erb file.html.haml         # Convert a single file"
 end
@@ -23,8 +25,15 @@ if ARGV.empty? || ARGV.include?("--help")
 end
 
 path = ARGV.find { |arg| !arg.start_with?("--") }
+dry_run = ARGV.include?("--dry-run")
 delete_original = ARGV.include?("--delete")
 validate = ARGV.include?("--check")
+
+unless path
+  puts "Error: No path specified"
+  print_usage
+  exit 1
+end
 
 if validate && !HamlToErb.herb_available?
   puts "Error: --check requires the herb gem. Install with: gem install herb"
@@ -33,7 +42,7 @@ end
 
 if File.directory?(path)
   files = Dir.glob(File.join(path, "**/*.haml"))
-  puts "Converting #{files.count} HAML files in #{path}..."
+  puts "#{dry_run ? '[DRY RUN] ' : ''}Converting #{files.count} HAML files in #{path}..."
   puts "Validation: #{validate ? 'enabled (Herb)' : 'disabled'}"
 
   success = 0
@@ -42,7 +51,7 @@ if File.directory?(path)
 
   files.each do |f|
     begin
-      result = HamlToErb.convert_file(f, delete_original: delete_original, validate: validate)
+      result = HamlToErb.convert_file(f, delete_original: delete_original, validate: validate, dry_run: dry_run)
       success += 1
       print "." if success % 50 == 0
 
@@ -80,13 +89,15 @@ if File.directory?(path)
     puts "Validation: All files passed Herb parsing"
   end
 
-  if delete_original && conversion_errors.empty?
+  if delete_original && conversion_errors.empty? && !dry_run
     puts "Original .haml files deleted."
   end
-elsif File.file?(path)
-  result = HamlToErb.convert_file(path, delete_original: delete_original, validate: validate)
 
-  puts "Converted: #{path} -> #{result[:path]}"
+  puts "No files written (dry run)." if dry_run
+elsif File.file?(path)
+  result = HamlToErb.convert_file(path, delete_original: delete_original, validate: validate, dry_run: dry_run)
+
+  puts "#{dry_run ? '[DRY RUN] Would convert' : 'Converted'}: #{path} -> #{result[:path]}"
 
   if result[:errors].any?
     puts "Validation issues:"
@@ -99,7 +110,8 @@ elsif File.file?(path)
     puts "Validation: Passed"
   end
 
-  puts "Original deleted." if delete_original
+  puts "Original deleted." if delete_original && !dry_run
+  puts "No file written (dry run)." if dry_run
 else
   puts "Error: #{path} is not a file or directory"
   exit 1
