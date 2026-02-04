@@ -35,7 +35,7 @@ module HamlToErb
         elsif key == "id"
           id_parts << value
         else
-          attrs[key] = "#{key}=\"#{value}\""
+          attrs[key] = "#{key}=\"#{escape_attr(value)}\""
         end
       end
 
@@ -62,10 +62,10 @@ module HamlToErb
         id_parts << obj_ref_attrs[:id] if obj_ref_attrs[:id]
       end
 
-      # Build final parts array
+      # Build final parts array - escape non-ERB parts only
       parts = []
-      parts << "class=\"#{class_parts.join(' ')}\"" if class_parts.any?
-      parts << "id=\"#{id_parts.join(' ')}\"" if id_parts.any?
+      parts << "class=\"#{escape_parts(class_parts).join(' ')}\"" if class_parts.any?
+      parts << "id=\"#{escape_parts(id_parts).join(' ')}\"" if id_parts.any?
       parts.concat(attrs.values)
 
       parts.empty? ? "" : " " + parts.join(" ")
@@ -322,6 +322,16 @@ module HamlToErb
       end
     end
 
+    # Escape an array of attribute parts, skipping ERB expressions
+    def escape_parts(parts)
+      parts.map { |part| part.include?("<%") ? part : escape_attr(part) }
+    end
+
+    # HTML5 attribute escaping:
+    # - & → &amp; (prevents entity injection)
+    # - " → &quot; (prevents attribute boundary escape)
+    # - < and > NOT escaped (valid in HTML5 attribute values per spec,
+    #   required for Stimulus actions like "click->form#submit")
     def escape_attr(str)
       str.to_s.gsub("&", "&amp;").gsub('"', "&quot;")
     end

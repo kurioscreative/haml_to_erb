@@ -265,5 +265,17 @@ RSpec.describe HamlToErb::AttributeBuilder do
         expect(result).to include("title=")
       end
     end
+
+    context "static attribute escaping" do
+      it "escapes ampersand in static attribute values" do
+        result = builder.build({ "href" => "/search?a=1&b=2" }, nil, nil)
+        expect(result).to include('href="/search?a=1&amp;b=2"')
+      end
+
+      it "preserves angle brackets in static attributes (Stimulus)" do
+        result = builder.build({ "data-action" => "click->form#submit" }, nil, nil)
+        expect(result).to include('data-action="click->form#submit"')
+      end
+    end
   end
 end
