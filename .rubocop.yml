@@ -1,0 +1,106 @@
+# Omakase-flavored RuboCop for gems
+# Based on rails/rubocop-rails-omakase style preferences
+
+plugins:
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 3.2
+  NewCops: enable
+  SuggestExtensions: false
+
+# === Omakase Style Preferences ===
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+  Exclude:
+    - "spec/**/*"
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Style/HashSyntax:
+  EnforcedShorthandSyntax: either
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    default: "()"
+    "%i": "[]"
+    "%I": "[]"
+    "%r": "{}"
+    "%w": "[]"
+    "%W": "[]"
+
+Style/RedundantReturn:
+  AllowMultipleReturnValues: true
+
+Style/Semicolon:
+  AllowAsExpressionSeparator: true
+
+Layout/SpaceInsideArrayLiteralBrackets:
+  EnforcedStyle: space
+  EnforcedStyleForEmptyBrackets: no_space
+  Exclude:
+    - "spec/**/*"
+
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: space
+  EnforcedStyleForEmptyBraces: no_space
+  Exclude:
+    - "spec/**/*"
+
+Layout/SpaceInsideBlockBraces:
+  EnforcedStyleForEmptyBraces: space
+
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: variable
+
+Layout/CaseIndentation:
+  EnforcedStyle: end
+
+Layout/LineLength:
+  Exclude:
+    - "spec/**/*"
+
+# Intentional literal #{...} in tests for interpolation testing
+Lint/InterpolationCheck:
+  Exclude:
+    - "spec/**/*"
+
+# === Gem-specific Adjustments ===
+
+Style/Documentation:
+  Enabled: false
+
+# Allow mixed concatenation + interpolation for clarity
+# e.g., result + "\n" reads clearer than "#{result}\n"
+Style/StringConcatenation:
+  Enabled: false
+
+# Dev deps in gemspec is fine for gems
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+# Metrics cops are counterproductive for parsers/converters
+# These classes have inherent complexity that splitting would obscure
+Metrics:
+  Enabled: false
+
+# === RSpec Adjustments ===
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Exclude:
+    - "spec/haml_to_erb_spec.rb"
+
+# Overly prescriptive - "for X" is often clearer than "when X"
+RSpec/ContextWording:
+  Enabled: false
+
+RSpec/RepeatedExample:
+  Enabled: false
