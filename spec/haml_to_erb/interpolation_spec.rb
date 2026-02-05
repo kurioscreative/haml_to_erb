@@ -121,5 +121,17 @@ RSpec.describe HamlToErb::Interpolation do
         expect(result).to eq('Path: <%= "C:\\\\" %>')
       end
     end
+
+    context "unclosed interpolation" do
+      it "raises on unclosed interpolation" do
+        expect { described_class.convert('Hello #{name') }
+          .to raise_error(ArgumentError, /Unclosed interpolation/)
+      end
+
+      it "raises on unclosed with nested braces" do
+        expect { described_class.convert('#{hash[:key]') }
+          .to raise_error(ArgumentError, /Unclosed interpolation/)
+      end
+    end
   end
 end
