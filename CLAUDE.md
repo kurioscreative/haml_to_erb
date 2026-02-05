@@ -59,3 +59,4 @@ Tests use RSpec with a custom `be_valid_erb` matcher that validates output again
 - Whitespace removal markers (`>`, `<`) parsed but not applied
 - Old doctypes converted to HTML5
 - Unknown filters (`:markdown`, etc.) output as HTML comments
+- String escape sequences limited to `\"` and `\\` in interpolated string literals

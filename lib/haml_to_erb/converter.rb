@@ -88,6 +88,8 @@ module HamlToErb
         "#{ind}<%= #{code} %>\n" + emit_children(node, depth + 1) + "#{ind}<% end %>\n"
       elsif code.start_with?('"') && code.end_with?('"') && code.include?('#{')
         # String literal with interpolation - convert to text + ERB
+        # Only handles \" and \\. Complex escape sequences (\n, \t, \u{...}) are
+        # passed through literally — a known limitation (see CLAUDE.md).
         inner = code[1..-2]
         unescaped = inner.gsub('\"', '"').gsub("\\\\", "\\")
         "#{ind}#{Interpolation.convert(unescaped)}\n"
@@ -168,6 +170,8 @@ module HamlToErb
       val = tag_data[:value].to_s
       if tag_data[:parse]
         if val.start_with?('"') && val.end_with?('"') && val.include?('#{')
+          # Only handles \" and \\. Complex escape sequences (\n, \t, \u{...}) are
+          # passed through literally — a known limitation (see CLAUDE.md).
           inner = val[1..-2]
           unescaped = inner.gsub('\"', '"').gsub("\\\\", "\\")
           Interpolation.convert(unescaped)
