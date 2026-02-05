@@ -12,6 +12,10 @@ jobs:
     strategy:
       matrix:
         ruby-version: ["3.2", "3.3", "3.4"]
+        haml-version: ["~> 5.0", "~> 6.0", "~> 7.0"]
+        exclude:
+          # Haml 7.x requires Ruby 3.2+, but exclude older Ruby just to reduce matrix
+          # All combinations are valid since we require Ruby 3.2+
 
     steps:
       - uses: actions/checkout@v4
@@ -20,5 +24,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
+        env:
+          HAML_VERSION: ${{ matrix.haml-version }}
       - name: Run tests
         run: bundle exec rspec

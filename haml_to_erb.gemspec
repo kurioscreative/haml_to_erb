@@ -5,11 +5,12 @@ require_relative "lib/haml_to_erb/version"
 Gem::Specification.new do |spec|
   spec.name = "haml_to_erb"
   spec.version = HamlToErb::VERSION
-  spec.authors = ["Glenn Ericksen"]
-  spec.email = ["glenn.m.ericksen@gmail.com"]
+  spec.authors = [ "Glenn Ericksen" ]
+  spec.email = [ "glenn.m.ericksen@gmail.com" ]
 
   spec.summary = "Convert HAML templates to ERB"
-  spec.description = "A HAML to ERB converter for migrating Rails views. Handles tags, attributes, Ruby code, blocks, filters, and interpolation."
+  spec.description = "A HAML to ERB converter for migrating Rails views. " \
+                     "Handles tags, attributes, Ruby code, blocks, filters, and interpolation."
   spec.homepage = "https://github.com/kurioscreative/haml_to_erb"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
@@ -23,12 +24,14 @@ Gem::Specification.new do |spec|
     Dir["{lib,exe}/**/*", "README.md", "LICENSE.txt"].reject { |f| File.directory?(f) }
   end
   spec.bindir = "exe"
-  spec.executables = ["haml_to_erb"]
-  spec.require_paths = ["lib"]
+  spec.executables = [ "haml_to_erb" ]
+  spec.require_paths = [ "lib" ]
 
-  spec.add_dependency "haml", ">= 6.0"
+  spec.add_dependency "haml", ">= 5.0"
   spec.add_dependency "prism", ">= 0.24"
 
   spec.add_development_dependency "herb", ">= 0.1"
   spec.add_development_dependency "rspec", "~> 3.0"
+  spec.add_development_dependency "rubocop"
+  spec.add_development_dependency "rubocop-rspec"
 end
