@@ -60,14 +60,23 @@ results = HamlToErb.convert_directory("app/views",
 # Convert all HAML files in directory
 haml_to_erb app/views
 
-# Convert and validate with Herb
-haml_to_erb app/views --check
-
 # Convert a single file
 haml_to_erb file.html.haml
 
+# Validate output with Herb
+haml_to_erb app/views --check
+
+# Preview without writing files
+haml_to_erb app/views --dry-run
+
 # Delete originals after conversion
 haml_to_erb app/views --delete
+
+# Skip confirmation prompts
+haml_to_erb app/views --delete --force
+
+# Show full backtraces on errors
+haml_to_erb app/views --debug
 ```
 
 ## Error Handling
@@ -84,6 +93,30 @@ result = HamlToErb.convert_file("nonexistent.haml")
 # HAML syntax errors
 # => { ..., errors: [{ message: "HAML syntax error: ...", line: 5 }], skipped: true }
 ```
+
+## Design Decisions
+
+### Static Value Optimization
+
+The converter uses Ruby's Prism parser to detect static attribute values (strings, symbols, numbers, booleans) and inline them directly into HTML. Dynamic expressions fall back to ERB tags.
+
+```haml
+%div{ class: "foo", data: { action: "click" }, href: @path }
+```
+
+Becomes:
+
+```erb
+<div class="foo" data-action="click" href="<%= @path %>">
+```
+
+Without this optimization, all values would be wrapped in ERB:
+
+```erb
+<div class="<%= "foo" %>" data-action="<%= "click" %>" href="<%= @path %>">
+```
+
+This produces output that looks like what a human would write, making converted templates easier to review and maintain. It also avoids unnecessary ERB evaluation at runtime for values that never change.
 
 ## Known Limitations
 
