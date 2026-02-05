@@ -22,7 +22,7 @@ RSpec.describe HamlToErb::PrismParser do
         expect(result).to eq({ count: 42, rate: 3.14, active: true, deleted: false })
       end
 
-      # Note: PrismParser returns nil for hashes containing nil values
+      # NOTE: PrismParser returns nil for hashes containing nil values
       # because nil values are typically omitted in HTML attributes
       it "returns nil for hash with nil values (treated as dynamic)" do
         result = parser.parse_hash("{ value: nil }")
@@ -125,12 +125,12 @@ RSpec.describe HamlToErb::PrismParser do
 
       it "parses array of strings" do
         result = parser.parse_array('["foo", "bar", "baz"]')
-        expect(result).to eq(["foo", "bar", "baz"])
+        expect(result).to eq(%w[foo bar baz])
       end
 
       it "parses array of symbols" do
         result = parser.parse_array("[:a, :b, :c]")
-        expect(result).to eq([:a, :b, :c])
+        expect(result).to eq(%i[a b c])
       end
 
       it "parses mixed type array" do

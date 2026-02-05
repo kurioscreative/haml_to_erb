@@ -48,25 +48,21 @@ end
 
 if File.directory?(path)
   files = Dir.glob(File.join(path, "**/*.haml"))
-  puts "#{dry_run ? '[DRY RUN] ' : ''}Converting #{files.count} HAML files in #{path}..."
-  puts "Validation: #{validate ? 'enabled (Herb)' : 'disabled'}"
+  puts "#{"[DRY RUN] " if dry_run}Converting #{files.count} HAML files in #{path}..."
+  puts "Validation: #{validate ? "enabled (Herb)" : "disabled"}"
 
   success = 0
   conversion_errors = []
   validation_issues = []
 
   files.each do |f|
-    begin
-      result = HamlToErb.convert_file(f, delete_original: delete_original, validate: validate, dry_run: dry_run)
-      success += 1
-      print "." if success % 50 == 0
+    result = HamlToErb.convert_file(f, delete_original: delete_original, validate: validate, dry_run: dry_run)
+    success += 1
+    print "." if (success % 50).zero?
 
-      if result[:errors].any?
-        validation_issues << { file: result[:path], errors: result[:errors] }
-      end
-    rescue StandardError => e
-      conversion_errors << { file: f, error: e.message }
-    end
+    validation_issues << { file: result[:path], errors: result[:errors] } if result[:errors].any?
+  rescue StandardError => e
+    conversion_errors << { file: f, error: e.message }
   end
 
   puts
@@ -95,15 +91,13 @@ if File.directory?(path)
     puts "Validation: All files passed Herb parsing"
   end
 
-  if delete_original && conversion_errors.empty? && !dry_run
-    puts "Original .haml files deleted."
-  end
+  puts "Original .haml files deleted." if delete_original && conversion_errors.empty? && !dry_run
 
   puts "No files written (dry run)." if dry_run
 elsif File.file?(path)
   result = HamlToErb.convert_file(path, delete_original: delete_original, validate: validate, dry_run: dry_run)
 
-  puts "#{dry_run ? '[DRY RUN] Would convert' : 'Converted'}: #{path} -> #{result[:path]}"
+  puts "#{dry_run ? "[DRY RUN] Would convert" : "Converted"}: #{path} -> #{result[:path]}"
 
   if result[:errors].any?
     puts "Validation issues:"

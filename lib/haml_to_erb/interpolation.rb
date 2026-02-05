@@ -32,7 +32,7 @@ module HamlToErb
             j = i + 2
             in_string = nil
 
-            while j < text.length && depth > 0
+            while j < text.length && depth.positive?
               char = text[j]
               if in_string
                 if char == in_string
@@ -44,7 +44,7 @@ module HamlToErb
                   end
                   in_string = nil unless num_backslashes.odd?
                 end
-              elsif char == '"' || char == "'"
+              elsif [ '"', "'" ].include?(char)
                 in_string = char
               elsif char == "{"
                 depth += 1
@@ -54,7 +54,7 @@ module HamlToErb
               j += 1
             end
 
-            result << "<%= #{text[i + 2...j - 1]} %>"
+            result << "<%= #{text[(i + 2)...(j - 1)]} %>"
             i = j
           end
         else

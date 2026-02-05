@@ -219,37 +219,37 @@ RSpec.describe HamlToErb do
 
   describe ".validate" do
     it "returns valid result for valid ERB" do
-      result = HamlToErb.validate("<p><%= @name %></p>")
+      result = described_class.validate("<p><%= @name %></p>")
       expect(result.valid?).to be true
       expect(result.errors).to be_empty
     end
 
     it "returns invalid result for malformed ERB" do
-      result = HamlToErb.validate("<%= if true %>")
+      result = described_class.validate("<%= if true %>")
       expect(result.valid?).to be false
       expect(result.errors).not_to be_empty
     end
 
     it "includes error details with message" do
-      result = HamlToErb.validate("<%= unclosed")
+      result = described_class.validate("<%= unclosed")
       expect(result.errors.first).to have_key(:message)
     end
   end
 
   describe ".convert_and_validate" do
     it "converts and validates in one call" do
-      result = HamlToErb.convert_and_validate("%p Hello")
+      result = described_class.convert_and_validate("%p Hello")
       expect(result).to be_a(HamlToErb::ValidationResult)
       expect(result.erb).to include("<p>Hello</p>")
     end
 
     it "returns ValidationResult with erb content" do
-      result = HamlToErb.convert_and_validate("%div.foo")
+      result = described_class.convert_and_validate("%div.foo")
       expect(result.erb).to include('class="foo"')
     end
 
     it "reports validation errors for complex output" do
-      result = HamlToErb.convert_and_validate("%p= @value")
+      result = described_class.convert_and_validate("%p= @value")
       expect(result.valid?).to be true
     end
   end

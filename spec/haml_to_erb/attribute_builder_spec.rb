@@ -46,7 +46,7 @@ RSpec.describe HamlToErb::AttributeBuilder do
         dynamic = Struct.new(:old, :new).new('class: "navbar"', nil)
         result = builder.build(static, dynamic, nil)
         expect(result).to include('class="page-nav navbar"')
-        expect(result.scan(/class=/).count).to eq(1)
+        expect(result.scan("class=").count).to eq(1)
       end
 
       it "merges multiple shorthand classes with hash class" do
@@ -61,7 +61,7 @@ RSpec.describe HamlToErb::AttributeBuilder do
         dynamic = Struct.new(:old, :new).new('id: "bar"', nil)
         result = builder.build(static, dynamic, nil)
         expect(result).to include('id="foo bar"')
-        expect(result.scan(/id=/).count).to eq(1)
+        expect(result.scan("id=").count).to eq(1)
       end
     end
 

@@ -34,6 +34,7 @@ module HamlToErb
 
     private
 
+    # rubocop:disable Lint/DuplicateBranch, Style/EmptyElse
     def extract_value(node)
       case node
       when Prism::HashNode then extract_hash(node)
@@ -49,7 +50,9 @@ module HamlToErb
       else nil # method calls, variables, etc.
       end
     end
+    # rubocop:enable Lint/DuplicateBranch, Style/EmptyElse
 
+    # rubocop:disable Lint/DuplicateBranch
     def extract_hash(node)
       result = {}
       node.elements.each do |element|
@@ -57,8 +60,10 @@ module HamlToErb
         when Prism::AssocNode
           key = extract_key(element.key)
           return nil if key.nil?
+
           value = extract_value(element.value)
           return nil if value.nil?
+
           result[key] = value
         when Prism::AssocSplatNode
           return nil # **hash - dynamic
@@ -68,17 +73,20 @@ module HamlToErb
       end
       result
     end
+    # rubocop:enable Lint/DuplicateBranch
 
     def extract_array(node)
       result = []
       node.elements.each do |element|
         value = extract_value(element)
         return nil if value.nil?
+
         result << value
       end
       result
     end
 
+    # rubocop:disable Style/EmptyElse
     def extract_key(node)
       case node
       when Prism::SymbolNode then node.unescaped.to_sym
@@ -86,5 +94,6 @@ module HamlToErb
       else nil
       end
     end
+    # rubocop:enable Style/EmptyElse
   end
 end

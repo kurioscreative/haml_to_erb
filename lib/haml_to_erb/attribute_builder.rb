@@ -64,8 +64,8 @@ module HamlToErb
 
       # Build final parts array - escape non-ERB parts only
       parts = []
-      parts << "class=\"#{escape_parts(class_parts).join(' ')}\"" if class_parts.any?
-      parts << "id=\"#{escape_parts(id_parts).join(' ')}\"" if id_parts.any?
+      parts << "class=\"#{escape_parts(class_parts).join(" ")}\"" if class_parts.any?
+      parts << "id=\"#{escape_parts(id_parts).join(" ")}\"" if id_parts.any?
       parts.concat(attrs.values)
 
       parts.empty? ? "" : " " + parts.join(" ")
@@ -75,7 +75,7 @@ module HamlToErb
 
     def extract_quoted_value(attr_str, prefix)
       if attr_str =~ /\A#{prefix}="(.*)"\z/
-        $1
+        ::Regexp.last_match(1)
       else
         attr_str.sub(/\A#{prefix}="/, "").sub(/"\z/, "")
       end
@@ -136,7 +136,7 @@ module HamlToErb
 
     def format_array_value(attr_name, value)
       if attr_name == "class"
-        [ "#{attr_name}=\"#{escape_attr(value.join(' '))}\"" ]
+        [ "#{attr_name}=\"#{escape_attr(value.join(" "))}\"" ]
       else
         [ "#{attr_name}=\"#{escape_attr(value.to_json)}\"" ]
       end
@@ -193,12 +193,12 @@ module HamlToErb
           escape = false
         elsif char == "\\"
           escape = true
-        elsif interpolation_depth > 0
+        elsif interpolation_depth.positive?
           if char == "{"
             interpolation_depth += 1
           elsif char == "}"
             interpolation_depth -= 1
-          elsif char == '"' || char == "'"
+          elsif [ '"', "'" ].include?(char)
             quote = char
             i += 1
             while i < str.length
@@ -218,7 +218,7 @@ module HamlToErb
           elsif char == in_string
             in_string = nil
           end
-        elsif char == '"' || char == "'"
+        elsif [ '"', "'" ].include?(char)
           in_string = char
         elsif depth.key?(char)
           depth[char] += 1
@@ -240,7 +240,7 @@ module HamlToErb
       elsif value.start_with?("[")
         format_array_literal(key, value)
       elsif value =~ /\A(["'])(.*)\1\z/m
-        format_string_literal(key, value, $2)
+        format_string_literal(key, value, ::Regexp.last_match(2))
       elsif value == "true"
         format_true_value(key).first || key
       elsif value == "false"
@@ -248,7 +248,7 @@ module HamlToErb
       elsif value == "nil"
         nil
       elsif value =~ /\A:(\w+)\z/
-        "#{key}=\"#{$1}\""
+        "#{key}=\"#{::Regexp.last_match(1)}\""
       elsif value =~ /\A\d+(\.\d+)?\z/
         "#{key}=\"#{value}\""
       elsif BOOLEAN_ATTRIBUTES.include?(key)

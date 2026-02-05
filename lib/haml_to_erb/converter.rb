@@ -86,9 +86,9 @@ module HamlToErb
 
       if node.children.any?
         "#{ind}<%= #{code} %>\n" + emit_children(node, depth + 1) + "#{ind}<% end %>\n"
-      elsif code =~ /\A"(.*)"\z/m && $1.include?('#{')
+      elsif code =~ /\A"(.*)"\z/m && ::Regexp.last_match(1).include?('#{')
         # String literal with interpolation - convert to text + ERB
-        unescaped = $1.gsub(/\\"/, '"').gsub(/\\\\/, "\\")
+        unescaped = ::Regexp.last_match(1).gsub('\"', '"').gsub("\\\\", "\\")
         "#{ind}#{Interpolation.convert(unescaped)}\n"
       else
         "#{ind}<%= #{code} %>\n"
@@ -117,9 +117,7 @@ module HamlToErb
       needs_end = BLOCK_KEYWORDS.include?(keyword) ||
                   code.match?(/\bdo\s*(\|[^|]*\|)?\s*\z/) ||
                   code.match?(/\A\s*(while|until|for)\b/)
-      if needs_end && node.children.any?
-        result += "#{ind}<% end %>\n"
-      end
+      result += "#{ind}<% end %>\n" if needs_end && node.children.any?
 
       result
     end
@@ -131,9 +129,13 @@ module HamlToErb
 
       case name
       when "javascript"
-        "#{ind}<script>\n" + text.lines.map { |l| "#{ind}  #{Interpolation.convert(l.rstrip)}\n" }.join + "#{ind}</script>\n"
+        "#{ind}<script>\n" + text.lines.map { |l|
+          "#{ind}  #{Interpolation.convert(l.rstrip)}\n"
+        }.join + "#{ind}</script>\n"
       when "css"
-        "#{ind}<style>\n" + text.lines.map { |l| "#{ind}  #{Interpolation.convert(l.rstrip)}\n" }.join + "#{ind}</style>\n"
+        "#{ind}<style>\n" + text.lines.map { |l|
+          "#{ind}  #{Interpolation.convert(l.rstrip)}\n"
+        }.join + "#{ind}</style>\n"
       when "plain", "erb"
         text.lines.map { |l| "#{ind}#{l.rstrip}\n" }.join
       when "ruby"
@@ -161,11 +163,11 @@ module HamlToErb
       "#{indent(depth)}#{Interpolation.convert(node.value[:text])}\n"
     end
 
-    def format_tag_content(v)
-      val = v[:value].to_s
-      if v[:parse]
-        if val =~ /\A"(.*)"\z/m && $1.include?('#{')
-          unescaped = $1.gsub(/\\"/, '"').gsub(/\\\\/, "\\")
+    def format_tag_content(tag_data)
+      val = tag_data[:value].to_s
+      if tag_data[:parse]
+        if val =~ /\A"(.*)"\z/m && ::Regexp.last_match(1).include?('#{')
+          unescaped = ::Regexp.last_match(1).gsub('\"', '"').gsub("\\\\", "\\")
           Interpolation.convert(unescaped)
         else
           "<%= #{val} %>"
