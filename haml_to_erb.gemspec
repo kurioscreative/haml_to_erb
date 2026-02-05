@@ -31,8 +31,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "haml", ">= 5.0", "< 8"
   spec.add_dependency "prism", ">= 0.24", "< 2"
 
-  spec.add_development_dependency "rake"
   spec.add_development_dependency "herb", ">= 0.1"
+  spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "rubocop"
   spec.add_development_dependency "rubocop-rspec"

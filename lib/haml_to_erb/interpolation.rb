@@ -54,7 +54,7 @@ module HamlToErb
               j += 1
             end
 
-            raise ArgumentError, "Unclosed interpolation starting at position #{i} in: #{text}" if depth > 0
+            raise ArgumentError, "Unclosed interpolation starting at position #{i} in: #{text}" if depth.positive?
 
             result << "<%= #{text[(i + 2)...(j - 1)]} %>"
             i = j

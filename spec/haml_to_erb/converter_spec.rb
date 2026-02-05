@@ -473,5 +473,41 @@ RSpec.describe HamlToErb::Converter do
         expect(result).not_to include("<% end %>")
       end
     end
+
+    context "HTML-style attributes" do
+      it "converts basic HTML-style attributes" do
+        expect(convert('%div(class="foo")')).to include('class="foo"')
+      end
+
+      it "converts multiple HTML-style attributes" do
+        result = convert('%input(type="text" name="email")')
+        expect(result).to include('type="text"')
+        expect(result).to include('name="email"')
+      end
+    end
+
+    context "multiline attributes" do
+      it "converts hash attributes spanning multiple lines" do
+        haml = "%div{class: \"foo\",\n     id: \"bar\"}"
+        result = convert(haml)
+        expect(result).to include('class="foo"')
+        expect(result).to include('id="bar"')
+      end
+    end
+
+    context "complex nested interpolation" do
+      it "handles map with nested interpolation" do
+        result = convert('%p #{items.map { |i| "#{i.name}" }.join(", ")}')
+        expect(result).to include('<%= items.map { |i| "#{i.name}" }.join(", ") %>')
+      end
+    end
+
+    context "object reference with prefix" do
+      it "converts object reference with custom prefix" do
+        result = convert("%tr[@item, :product]")
+        expect(result).to include('<tr')
+        expect(result).to include('"product_"')
+      end
+    end
   end
 end
