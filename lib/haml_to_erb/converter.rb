@@ -63,6 +63,8 @@ module HamlToErb
       elsif v[:value] && !v[:value].to_s.empty?
         content = format_tag_content(v)
         if is_void
+          warn "WARNING: Void element <#{tag}> has inline content at line #{node.line}. " \
+               "Content will be emitted as a sibling."
           "#{result}\n#{ind}#{content}\n"
         else
           "#{result}#{content}</#{tag}>\n"

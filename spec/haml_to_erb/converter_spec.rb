@@ -421,6 +421,23 @@ RSpec.describe HamlToErb::Converter do
       end
     end
 
+    context "void elements with inline content" do
+      it "warns when void element has inline content" do
+        expect { convert("%br Hello") }.to output(/WARNING.*Void element.*<br>.*inline content/i).to_stderr
+      end
+
+      it "emits inline content as sibling for void elements" do
+        result = convert("%img{src: 'test.jpg'} Caption")
+        expect(result).to include("<img")
+        expect(result).not_to include("</img>")
+        expect(result).to include("Caption")
+      end
+
+      it "does not warn for void element without content" do
+        expect { convert("%br") }.not_to output(/WARNING/i).to_stderr
+      end
+    end
+
     context "whitespace removal markers" do
       it "handles > (remove outer whitespace)" do
         result = convert("%span> text")
