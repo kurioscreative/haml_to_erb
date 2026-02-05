@@ -31,6 +31,7 @@ if ARGV.include?("--version") || ARGV.include?("-v")
 end
 
 path = ARGV.find { |arg| !arg.start_with?("--") }
+path = File.expand_path(path) if path
 dry_run = ARGV.include?("--dry-run")
 delete_original = ARGV.include?("--delete")
 validate = ARGV.include?("--check")
