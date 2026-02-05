@@ -1,0 +1,6 @@
+spec/examples.txt
+*.gem
+pkg/
+.bundle/
+tmp/
+.DS_Store
