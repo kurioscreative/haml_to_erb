@@ -86,9 +86,10 @@ module HamlToErb
 
       if node.children.any?
         "#{ind}<%= #{code} %>\n" + emit_children(node, depth + 1) + "#{ind}<% end %>\n"
-      elsif code =~ /\A"(.*)"\z/m && ::Regexp.last_match(1).include?('#{')
+      elsif code.start_with?('"') && code.end_with?('"') && code.include?('#{')
         # String literal with interpolation - convert to text + ERB
-        unescaped = ::Regexp.last_match(1).gsub('\"', '"').gsub("\\\\", "\\")
+        inner = code[1..-2]
+        unescaped = inner.gsub('\"', '"').gsub("\\\\", "\\")
         "#{ind}#{Interpolation.convert(unescaped)}\n"
       else
         "#{ind}<%= #{code} %>\n"
@@ -166,8 +167,9 @@ module HamlToErb
     def format_tag_content(tag_data)
       val = tag_data[:value].to_s
       if tag_data[:parse]
-        if val =~ /\A"(.*)"\z/m && ::Regexp.last_match(1).include?('#{')
-          unescaped = ::Regexp.last_match(1).gsub('\"', '"').gsub("\\\\", "\\")
+        if val.start_with?('"') && val.end_with?('"') && val.include?('#{')
+          inner = val[1..-2]
+          unescaped = inner.gsub('\"', '"').gsub("\\\\", "\\")
           Interpolation.convert(unescaped)
         else
           "<%= #{val} %>"
