@@ -27,29 +27,51 @@ require_relative "haml_to_erb/converter"
 #   HamlToErb.convert_and_validate(haml_string)  # Returns { erb:, valid:, errors: }
 #
 module HamlToErb
+  # Holds conversion output and any validation errors.
+  #
+  # @example
+  #   result = HamlToErb.convert_and_validate(haml_string)
+  #   result.erb    #=> "<div class=\"foo\">...</div>"
+  #   result.valid? #=> true
+  #   result.errors #=> []
   class ValidationResult
-    attr_reader :erb, :errors
+    # @return [String] the converted ERB output
+    attr_reader :erb
+    # @return [Array<Hash>] validation errors, each with :message and optional :line, :column
+    attr_reader :errors
 
+    # @param erb [String] converted ERB string
+    # @param errors [Array<Hash>] validation errors
     def initialize(erb:, errors: [])
       @erb = erb
       @errors = errors
     end
 
+    # @return [Boolean] true when there are no validation errors
     def valid?
       @errors.empty?
     end
 
+    # @return [Hash{Symbol => Object}] hash with :erb, :valid, and :errors keys
     def to_h
       { erb: @erb, valid: valid?, errors: @errors }
     end
   end
 
+  # Convert a HAML string to ERB.
+  #
+  # @param input [String] HAML template source
+  # @return [String] converted ERB output
+  # @raise [Haml::SyntaxError] if the input is not valid HAML
   def self.convert(input)
     Converter.new(input).convert
   end
 
-  # Validate ERB using Herb parser
-  # Returns ValidationResult with errors array
+  # Validate ERB output using the Herb parser.
+  #
+  # @param erb [String] ERB string to validate
+  # @return [ValidationResult]
+  # @raise [RuntimeError] if the herb gem is not installed
   def self.validate(erb)
     require_herb!
     result = Herb.parse(erb)
@@ -57,13 +79,23 @@ module HamlToErb
     ValidationResult.new(erb: erb, errors: errors)
   end
 
-  # Convert HAML to ERB and validate the output
-  # Returns ValidationResult
+  # Convert HAML to ERB and validate the output in one step.
+  #
+  # @param input [String] HAML template source
+  # @return [ValidationResult]
+  # @raise [RuntimeError] if the herb gem is not installed
   def self.convert_and_validate(input)
     erb = convert(input)
     validate(erb)
   end
 
+  # Convert a single HAML file to ERB, writing the result alongside the original.
+  #
+  # @param haml_path [String] path to the .haml file
+  # @param delete_original [Boolean] remove the .haml file after successful conversion
+  # @param validate [Boolean] validate the ERB output with Herb
+  # @param dry_run [Boolean] return the converted output without writing to disk
+  # @return [Hash] result with :path, :errors, and optionally :skipped, :dry_run, :content
   def self.convert_file(haml_path, delete_original: false, validate: false, dry_run: false)
     erb_path = haml_path.sub(/\.haml\z/, ".erb")
 
@@ -95,13 +127,22 @@ module HamlToErb
     result
   end
 
+  # Convert all .haml files in a directory tree to ERB.
+  #
+  # @param dir_path [String] root directory to search for .haml files
+  # @param delete_originals [Boolean] remove .haml files after successful conversion
+  # @param validate [Boolean] validate each ERB output with Herb
+  # @param dry_run [Boolean] return converted output without writing to disk
+  # @return [Array<Hash>] array of result hashes, one per file (see {.convert_file})
   def self.convert_directory(dir_path, delete_originals: false, validate: false, dry_run: false)
     Dir.glob(File.join(dir_path, "**/*.haml")).map do |haml_path|
       convert_file(haml_path, delete_original: delete_originals, validate: validate, dry_run: dry_run)
     end
   end
 
-  # Check if Herb gem is available
+  # Check if the Herb gem is available for validation.
+  #
+  # @return [Boolean]
   def self.herb_available?
     require "herb"
     true
