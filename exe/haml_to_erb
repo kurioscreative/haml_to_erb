@@ -11,6 +11,7 @@ def print_usage
   puts "  --delete    Delete original .haml files after conversion"
   puts "  --force     Skip confirmation prompts"
   puts "  --check     Validate ERB output with Herb parser"
+  puts "  --debug     Show full error backtraces"
   puts "  --help      Show this help message"
   puts "  --version   Show version number"
   puts
@@ -37,6 +38,7 @@ dry_run = ARGV.include?("--dry-run")
 delete_original = ARGV.include?("--delete")
 validate = ARGV.include?("--check")
 force = ARGV.include?("--force")
+debug = ARGV.include?("--debug")
 
 unless path
   puts "Error: No path specified"
@@ -70,7 +72,7 @@ if File.directory?(path)
 
     validation_issues << { file: result[:path], errors: result[:errors] } if result[:errors].any?
   rescue StandardError => e
-    conversion_errors << { file: f, error: e.message }
+    conversion_errors << { file: f, error: e }
   end
 
   puts
@@ -80,7 +82,8 @@ if File.directory?(path)
     puts
     puts "Conversion errors: #{conversion_errors.count}"
     conversion_errors.each do |err|
-      puts "  #{err[:file]}: #{err[:error]}"
+      puts "  #{err[:file]}: #{err[:error].message}"
+      err[:error].backtrace.each { |line| puts "    #{line}" } if debug
     end
   end
 
