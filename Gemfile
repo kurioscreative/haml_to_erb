@@ -9,5 +9,8 @@ gem "haml", ENV["HAML_VERSION"] if ENV["HAML_VERSION"]
 
 group :development, :test do
   gem "herb"
-  gem "rspec", "~> 3.0"
+  gem "rake"
+  gem "rspec"
+  gem "rubocop"
+  gem "rubocop-rspec"
 end

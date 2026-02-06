@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     haml_to_erb (0.0.1)
-      haml (>= 5.0)
-      prism (>= 0.24)
+      haml (>= 5.0, < 8)
+      prism (>= 0.24, < 2)
 
 GEM
   remote: https://rubygems.org/
@@ -35,6 +35,7 @@ GEM
     prism (1.9.0)
     racc (1.8.1)
     rainbow (3.1.1)
+    rake (13.3.1)
     regexp_parser (2.11.3)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
@@ -89,8 +90,9 @@ PLATFORMS
 
 DEPENDENCIES
   haml_to_erb!
-  herb (>= 0.1, >= 0)
-  rspec (~> 3.0)
+  herb (~> 0.8, >= 0)
+  rake
+  rspec
   rubocop
   rubocop-rspec
 
