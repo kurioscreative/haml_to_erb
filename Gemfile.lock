@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    haml_to_erb (0.0.1)
+    haml_to_erb (0.1.0)
       haml (>= 5.0, < 8)
       prism (>= 0.24, < 2)
 
